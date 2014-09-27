@@ -21,6 +21,7 @@
             left: 0;
             bottom: 0;
             right: 0;
+            border: 1vmin solid black;
         }
 
         #glass {
@@ -33,11 +34,16 @@
         }
 
         #glass-divider {
-            position: relative;
-            background: white;
-            height: 100%;
-            width: 5%;
+            position: absolute;
+            background: black;
+            height: 98vmin;
+            width: 1%;
+            border: solid white;
+            border-width: 0 2vmin;
+            left: 0;
+            right: 0;
             margin: auto;
+            margin-top: 1vmin;
         }
 
         #sign {
@@ -57,9 +63,9 @@
             -ms-transform-origin: 50% -50%;
             transform-origin: 50% -50%;
 
-            -webkit-box-shadow: 0 0 10vmin 1vmin;
-            -moz-box-shadow: 0 0 10vmin 1vmin;
-            box-shadow: 0 0 10vmin 1vmin;
+            -webkit-box-shadow: 2vmin 1vmin 5vmin -2vmin;
+            -moz-box-shadow: 2vmin 1vmin 5vmin -2vmin;
+            box-shadow: 2vmin 1vmin 5vmin -2vmin;
         }
 
         @-webkit-keyframes sway {
@@ -88,6 +94,9 @@
             -webkit-transform: rotate(-30deg);
             -ms-transform: rotate(-30deg);
             transform: rotate(-30deg);
+            -webkit-box-shadow: 0 .5vmin 2vmin -.1vmin rgba(0,0,0,1);
+            -moz-box-shadow: 0 .5vmin 2vmin -.1vmin rgba(0,0,0,1);
+            box-shadow: 0 .5vmin 2vmin -.1vmin rgba(0,0,0,1);
         }
 
         #right-string {
@@ -102,6 +111,9 @@
             -webkit-transform: rotate(30deg);
             -ms-transform: rotate(30deg);
             transform: rotate(30deg);
+            -webkit-box-shadow: .5vmin 0 2vmin -.1vmin rgba(0,0,0,1);
+            -moz-box-shadow: .5vmin 0 2vmin -.1vmin rgba(0,0,0,1);
+            box-shadow: .5vmin 0 2vmin -.1vmin rgba(0,0,0,1);
         }
 
         #fjatt-L1 {
