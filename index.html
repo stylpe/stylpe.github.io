@@ -140,6 +140,37 @@
             left: 15%;
             width: 10%;
         }
+        #treshade {
+            top: 25%;
+            left: 40%;
+            height: 50%;
+            border: 1vmin solid rgba(255, 222, 0, 0.2);
+            border-radius: 100%;
+            box-shadow: 0 0 8vmin 5vmin rgba(255, 222, 0, 0.2);
+            opacity: 0;
+            -webkit-animation: flash 10s infinite 10s;
+            animation: flash 10s infinite 10s;
+        }
+        #tre:hover #treshade  {
+            -webkit-animation: 0;
+            animation: 0;
+        }
+        @-webkit-keyframes flash {
+            from {opacity: 0}
+            95% {opacity: 0}
+            96% {opacity: 1}
+            97% {opacity: 0}
+            98% {opacity: 1}
+            99% {opacity: 0}
+        }
+        @keyframes flash {
+            from {opacity: 0}
+            95% {opacity: 0}
+            96% {opacity: 1}
+            97% {opacity: 0}
+            98% {opacity: 1}
+            99% {opacity: 0}
+        }
         #tre img {
             width: 100%;
             -webkit-transform-origin: 50% 100%;
@@ -261,6 +292,130 @@
             100% {-webkit-transform: translateX(-100%) translateY(100%);transform: translateX(-100%) translateY(100%);}
         }
 
+        #digidan-L1 {
+            right: 20%;
+            width: 20%;
+            -webkit-animation: snurrX 2s infinite 1s ease-in-out alternate;
+            animation: snurrX 2s infinite 1s ease-in-out alternate;
+        }
+
+        #digidan-L2 {
+            right: 0;
+            width: 100%;
+            -webkit-animation: snurrY 2s infinite ease-in-out alternate;
+            animation: snurrY 2s infinite ease-in-out alternate;
+        }
+        #digidan {
+            width: 100%;
+        }
+        @-webkit-keyframes snurrX {
+            from {-webkit-transform: translateX(0%);transform: translateX(0%);}
+            to {-webkit-transform: translateX(-100%);transform: translateX(-100%);}
+        }
+        @keyframes snurrX {
+            from {-webkit-transform: translateX(0%);transform: translateX(0%);}
+            to {-webkit-transform: translateX(-100%);transform: translateX(-100%);}
+        }
+        @-webkit-keyframes snurrY {
+            from {-webkit-transform: translateY(0%) scale(0.8);transform: translateY(0%) scale(0.8);}
+            to {-webkit-transform: translateY(60%) scale(1);transform: translateY(60%) scale(1);}
+        }
+        @keyframes snurrY {
+            from {-webkit-transform: translateY(0%) scale(0.8);transform: translateY(0%) scale(0.8);}
+            to {-webkit-transform: translateY(60%) scale(1);transform: translateY(60%) scale(1);}
+        }
+
+        #slapskaustrolle {
+            position: absolute;
+            height: 100%;
+            right: -250%;
+            bottom: 0;
+            -webkit-transition: right .3s;
+            transition: right .3s;
+        }
+        #slapskaustrigger {
+            width: 20%;
+            height: 100%;
+            right: 0;
+            z-index: 10;
+        }
+        #slapskaustrigger:hover #slapskaustrolle {
+            right: -25%;
+        }
+
+        .spy {
+            width: 140%;
+            position: absolute;
+            top: 45%;
+            right: -250%;
+            -webkit-transition: right .3s;
+            transition: right .3s;
+
+            -webkit-transform-origin: 100% 200%;
+            -ms-transform-origin: 100% 200%;
+            transform-origin: 100% 200%;
+            -webkit-transform: rotate(0.09turn);
+            -ms-transform: rotate(0.09turn);
+            transform: rotate(0.09turn);
+        }
+        #slapskaustrigger:hover .spy {
+            right: 100%;
+            -webkit-animation: spy .8s infinite linear;
+            animation: spy .8s infinite linear;
+        }
+
+        @-webkit-keyframes spy {
+            to {-webkit-transform: rotate(-0.15turn);transform: rotate(-0.15turn);}
+        }
+
+        @keyframes spy {
+            to {-webkit-transform: rotate(-0.15turn);transform: rotate(-0.15turn);}
+        }
+
+        #slapskaustrigger:hover #spy1 {
+            -webkit-animation-delay: 0.5s;
+            animation-delay: 0.5s;
+        }
+        #slapskaustrigger:hover #spy2 {
+            -webkit-animation-delay: 0.7s;
+            animation-delay: 0.7s;
+        }
+        #slapskaustrigger:hover #spy3 {
+            -webkit-animation-delay: 0.9s;
+            animation-delay: 0.9s;
+        }
+        #slapskaustrigger:hover #spy4 {
+            -webkit-animation-delay: 1.1s;
+            animation-delay: 1.1s;
+        }
+
+        #spyfyll {
+            width: 500%;
+            height: 0;
+            right: 0;
+            bottom: 0;
+            background-color: black;
+            -webkit-transition: height 60s;
+            transition: height 60s;
+        }
+        #slapskaustrigger:hover #spyfyll {
+            height: 100%;
+        }
+
+        #slapsflash {
+            width: 50%;
+            height: 100%;
+            right: 0;
+            background-color: rgba(255, 222, 0, 0.2);
+            box-shadow: 0 0 8vmin 5vmin rgba(255, 222, 0, 0.2);
+            opacity: 0;
+            -webkit-animation: flash 10s infinite 5s;
+            animation: flash 10s infinite 5s;
+        }
+        #slapskaustrigger:hover #slapsflash {
+            -webkit-animation: 0;
+            animation: 0;
+        }
     </style>
 </head>
 <body>
@@ -275,8 +430,19 @@
                     <span id="åli2" class="åli">ÅLI</span>
                     <span id="åli3" class="åli">ÅLI</span>
                     <span id="åli4" class="åli">ÅLI</span>
+                    <div id="treshade"></div>
                 </div>
+                <div id="digidan-L1"><div id="digidan-L2"><img id="digidan" src="digidan.png"></div></div>
                 <div id="fjatt-L1"><div id="fjatt-L2"><img src="fjatt.png"></div></div>
+                <div id="slapskaustrigger">
+                    <img id="slapskaustrolle" src="slapskaustrolle.png">
+                    <img class="spy" id="spy1" src="spy1.png">
+                    <img class="spy" id="spy2" src="spy2.png">
+                    <img class="spy" id="spy3" src="spy3.png">
+                    <img class="spy" id="spy4" src="spy4.png">
+                    <div id="slapsflash"></div>
+                    <div id="spyfyll"></div>
+                </div>
                 <img id="jonhest" src="jonhest.png">
             </div>
         </div>
