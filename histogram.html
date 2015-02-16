@@ -1,0 +1,346 @@
+<html>
+	<head>
+		<style type="text/css">
+			#canvas {
+				margin-top: 1em;
+				box-shadow: 5px 5px 25px;
+			}
+			#data {
+				float: left;
+				margin-right: 1ex;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="data">
+			<p>Samples</p>
+			<textarea id="samples" cols="15" rows="40">
+25.01099447
+24.99624890
+24.99705138
+25.00989106
+25.01049292
+25.01831710
+25.03476794
+25.00698207
+25.00969044
+25.02313198
+25.01159633
+25.00216719
+25.01651152
+24.99765324
+25.00607928
+25.02333260
+25.00748362
+25.01911958
+25.01721369
+25.01550842
+</textarea>
+		</div>
+		<div>
+			Confidence interval: <input id="ci" type="percent" size="2" value="95">%</input>
+			<button onclick="drawChart()">Calculate</button>
+			Student's t: <span id="studentT"></span>
+		</div>
+		<canvas id="canvas" width="1280" height="720"></canvas>
+
+		<script type="text/javascript" src="stat.js"></script>
+		<script type="text/javascript">
+			// http://stackoverflow.com/questions/15397036/drawing-dashed-lines-on-html5-canvas
+			CanvasRenderingContext2D.prototype.dashedLine = function (x1, y1, x2, y2, dashLen) {
+			    if (dashLen == undefined) dashLen = 2;
+			    this.moveTo(x1, y1);
+
+			    var dX = x2 - x1;
+			    var dY = y2 - y1;
+			    var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
+			    var dashX = dX / dashes;
+			    var dashY = dY / dashes;
+
+			    var q = 0;
+			    while (q++ < dashes) {
+			        x1 += dashX;
+			        y1 += dashY;
+			        this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+			    }
+			    this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+			};
+
+			c = document.getElementById('canvas')
+			ctx = c.getContext("2d");
+			xMax = c.width;
+			yMax = c.height;
+
+			function calcStudentT(p, x) {
+				var t = AStudT(p, x.length - 1);
+				document.getElementById('studentT').innerHTML = t;
+				return t;
+			}
+
+			function parseSamples() {
+				return document.getElementById('samples').value.match(/[^\r\n\t ]+/g).map(Number);
+			}
+
+			function sum(arr) {
+				return arr.reduce(function(a, b) { return a + b; });
+			}
+
+			function mean(arr) {
+				return sum(arr) / arr.length;
+			}
+
+			function stdev(arr) {
+				var m = mean(arr);
+				var dev = arr.reduce(function(total, x) { return total + Math.pow(x-m, 2)}, 0);
+				return Math.sqrt(dev/(arr.length-1));
+			}
+
+
+			/**
+			 * Decimal adjustment of a number.
+			 *
+			 * @param	{String}	type	The type of adjustment.
+			 * @param	{Number}	value	The number.
+			 * @param	{Integer}	exp		The exponent (the 10 logarithm of the adjustment base).
+			 * @returns	{Number}			The adjusted value.
+			 */
+			function decimalAdjust(type, value, exp) {
+				// If the exp is undefined or zero...
+				if (typeof exp === 'undefined' || +exp === 0) {
+					return Math[type](value);
+				}
+				value = +value;
+				exp = +exp;
+				// If the value is not a number or the exp is not an integer...
+				if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+					return NaN;
+				}
+				// Shift
+				value = value.toString().split('e');
+				value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+				// Shift back
+				value = value.toString().split('e');
+				return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+			}
+
+			// Decimal round
+			if (!Math.round10) {
+				Math.round10 = function(value, exp) {
+					return decimalAdjust('round', value, exp);
+				};
+			}
+			// Decimal floor
+			if (!Math.floor10) {
+				Math.floor10 = function(value, exp) {
+					return decimalAdjust('floor', value, exp);
+				};
+			}
+			// Decimal ceil
+			if (!Math.ceil10) {
+				Math.ceil10 = function(value, exp) {
+					return decimalAdjust('ceil', value, exp);
+				};
+			}
+
+			function drawChart() {
+				ctx.fillStyle="#FFFFFF";
+				ctx.fillRect(0,0,xMax, yMax);
+				ctx.fillStyle="#000000";
+				ctx.font="15px Arial"; 
+
+				var values = parseSamples();
+
+				var p = 1 - document.getElementById('ci').value * 0.01
+
+				var t = calcStudentT(p, values);
+
+//				v = gjennomsnitt
+				var v = mean(values)
+//				s standardavvik
+				var s = stdev(values)
+
+//				c = confidence margin
+				var c = (t*s)/Math.sqrt(values.length);
+
+
+				var min = values[0];
+				var max = values[0];
+				values.forEach(function(sample){
+					if (sample < min) {min = sample};
+					if (sample > max) {max = sample};
+				})
+				console.log(min, v, max, s, c);
+				var deviation = values.map(function(sample) { return sample - v; });
+				var interval = deviation.map(function(dev) { return Math.floor(dev/s); });
+				console.log(deviation);
+				console.log(interval);
+
+				var minInt = interval[0];
+				var maxInt = interval[0];
+				var intMap = {}
+				interval.forEach(function(i){
+					if(i < minInt) {minInt = i};
+					if(i > maxInt) {maxInt = i};
+					if(!intMap[i]) {intMap[i] = 0};
+					intMap[i] = intMap[i] + 1;
+				})
+				var nIntervals = maxInt - minInt + 1;
+				console.log(minInt, maxInt, intMap, nIntervals);
+
+				var maxVal = 0;
+				for (var i = minInt; i <= maxInt; i++) {
+					if(intMap[i] && intMap[i] > maxVal) {maxVal = intMap[i];}
+				};
+				console.log(maxVal);
+
+				var low = v + minInt*s;
+				var high = v + (maxInt+1)*s;
+				var diff = high - low;
+				console.log(low, high, diff);
+
+				// Confidence Interval
+				var cLow = v - c;
+				var cWidth = 2*c;
+				var cLowP = (cLow-low)/diff;
+				var cMidP = (v-low)/diff;
+				var cWidthP = cWidth/diff;
+				var cXLeft = (xMax-200)*cLowP + 100;
+				var cXMid = (xMax-200)*cMidP + 100;
+				var cXWidth = (xMax-200)*cWidthP;
+				var cXRight = cXLeft + cXWidth
+				ctx.fillStyle="#CCDDFF";
+				ctx.fillRect(cXLeft, yMax - 100, cXWidth, -(yMax - 200));
+				ctx.textAlign="center"; 
+				ctx.textBaseline="bottom";
+				ctx.fillStyle="#5577FF";
+				ctx.fillText("95% Confidence Interval", cXMid, 90);
+				ctx.beginPath();
+
+				ctx.textBaseline="top";
+				ctx.moveTo(cXLeft, yMax - 100);
+				ctx.lineTo(cXLeft, yMax - 80);
+				ctx.fillText(cLow.toFixed(4), cXLeft, yMax - 75);
+				ctx.moveTo(cXMid, yMax - 100);
+				ctx.lineTo(cXMid, yMax - 80);
+				ctx.moveTo(cXRight, yMax - 100);
+				ctx.lineTo(cXRight, yMax - 80);
+				ctx.fillText((cLow+cWidth).toFixed(4), cXRight, yMax - 75);
+				ctx.stroke();
+				ctx.fillStyle="#000000";
+				ctx.fillText(v.toFixed(4), cXMid, yMax - 75);
+
+
+				// Values
+				ctx.strokeStyle="#AA0000";
+				ctx.fillStyle="#FF6666";
+				var graphXLeft = 100;
+				var graphXWidth = xMax-200;
+				values.forEach(function(i){
+					var pct = (i-low)/diff;
+					var graphX = graphXLeft + graphXWidth*pct;
+					//ctx.moveTo(graphX, yMax - 100);
+					//ctx.lineTo(graphX, yMax - 120);
+					ctx.beginPath();
+      				ctx.arc(graphX, yMax - 100, 5, 0, 2 * Math.PI);
+					ctx.closePath();
+					ctx.stroke();
+					ctx.fill();
+				});
+
+				// Axes
+				ctx.beginPath();
+				ctx.strokeStyle="#000000";
+				ctx.fillStyle="#000000";
+				ctx.save();
+				ctx.font = "bold 17pt Courier";
+				ctx.moveTo(100, yMax - 100);
+				ctx.lineTo(xMax - 100, yMax - 100);
+				ctx.stroke();
+
+				ctx.moveTo(100, yMax - 100);
+				ctx.lineTo(100, 100);
+				ctx.stroke();
+				ctx.textAlign="center"; 
+				ctx.textBaseline="top";
+				ctx.fillText("Volume [mL]", xMax/2, yMax-40);
+				ctx.textAlign="center"; 
+				ctx.textBaseline="middle";
+				ctx.translate(50,yMax/2);
+				ctx.rotate(-Math.PI/2);
+				ctx.fillText("Frequency", 0, 0);
+				ctx.restore();
+
+				// Y Lables	
+				ctx.textAlign="end"; 
+				ctx.textBaseline="middle";
+				var heightStep = (yMax - 250) / (maxVal)
+				for (var i = 1; i <= maxVal; i++) {
+					var y = yMax - 100 - heightStep*i;
+					ctx.fillText(i,90,y);
+					ctx.moveTo(90, y);
+					ctx.lineTo(110, y);
+					ctx.stroke();
+				};
+
+				// X Lables	
+				var stepSize = 0.01;
+				var firstStep = Math.floor10(low, -2);
+				ctx.textAlign="center"; 
+				ctx.textBaseline="top";
+				for (var step = firstStep; step <= high; step += stepSize) {
+					if(step > low) {
+						var px = (step - low)/diff;
+						var x = px*(xMax - 200) + 100;
+						ctx.fillText(step.toFixed(2),x, yMax - 90);
+						ctx.moveTo(x, yMax - 90);
+						ctx.lineTo(x, yMax - 110);
+						ctx.stroke();
+					}
+					for (var i = 1; i <= 9; i++) {
+						var substep = step + (stepSize/10)*i;
+						if(substep > low && substep < high) {
+							var px = (substep - low)/diff;
+							var x = px*(xMax - 200) + 100;
+							ctx.moveTo(x, yMax - 97);
+							ctx.lineTo(x, yMax - 103);
+							ctx.stroke();
+						}
+					}
+				}
+
+				// Columns
+				var axisLength = xMax - 200;
+				var colsize = axisLength/nIntervals;
+				var margin = colsize*0.02;
+				console.log(axisLength, colsize);
+				ctx.strokeStyle="#DD0000";
+				ctx.beginPath();
+				for (var i = 0; i < nIntervals-1; i++) {
+					var x = 100 + colsize * i;
+					ctx.fillText(intervalText(minInt + i + 1), x+colsize, 100);
+					ctx.dashedLine(x+colsize, 120, x+colsize, yMax - 100, 10);
+				}
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.lineWidth = 2;
+				for (var i = 0; i < nIntervals; i++) {
+					var x = 100 + colsize * i;
+					var height = intMap[minInt+i];
+					if(!height) {height=0};
+					ctx.strokeStyle="#000000";
+					ctx.strokeRect(x, yMax - 100, colsize, -(height*heightStep));
+				};
+
+			}
+			function intervalText (i) {
+				if(i==0) {return "v"}
+				var sign = i > 0 ? "+" : "-";
+				i = Math.abs(i);
+				if(i == 1) {return "v" + sign + "s"}
+				return "v" + sign + i + "s"
+			}
+			drawChart();
+		</script>
+	</body>
+</html>
